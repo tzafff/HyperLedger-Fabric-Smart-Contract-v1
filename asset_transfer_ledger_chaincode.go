@@ -98,9 +98,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		// Retrieves the names of all assets
 		return t.GetAllAsset(stub)
 	} else if function == "ChangeUniversity" {
-		return t.ChangeUniversity(stub,args)
+		return t.ChangeUniversity(stub, args)
 	}
-	
 
 	return shim.Error("Invalid invoke function name. Expecting \"invoke\" \"delete\" \"query\"")
 }
@@ -239,7 +238,7 @@ func (t *SimpleChaincode) create(stub shim.ChaincodeStubInterface, args []string
 	result = args[5]
 	// Parse the balance argument as an integer
 
-	data := []byte(name+ "," + surname + "," + university + "," + vlab + "," + result)
+	data := []byte(name + "," + surname + "," + university + "," + vlab + "," + result)
 	// Write the new account to the ledger
 	err = stub.PutState(role, data)
 	if err != nil {
@@ -249,36 +248,32 @@ func (t *SimpleChaincode) create(stub shim.ChaincodeStubInterface, args []string
 	return shim.Success(nil)
 }
 
-
 func (t *SimpleChaincode) GetAllAsset(stub shim.ChaincodeStubInterface) pb.Response {
-    iterator, err := stub.GetStateByRange("", "")
-    if err != nil {
-        return shim.Error("Failed to get assets")
-    }
-    defer iterator.Close()
+	iterator, err := stub.GetStateByRange("", "")
+	if err != nil {
+		return shim.Error("Failed to get assets")
+	}
+	defer iterator.Close()
 
-    var assetNames []string
+	var assetNames []string
 
-    for iterator.HasNext() {
-        result, err := iterator.Next()
-        if err != nil {
-            return shim.Error("Failed to iterate over assets")
-        }
+	for iterator.HasNext() {
+		result, err := iterator.Next()
+		if err != nil {
+			return shim.Error("Failed to iterate over assets")
+		}
 
-        array, err := stub.GetState(result.GetKey())
-        assetNames = append(assetNames,result.Key ,string(array))
-        // stringArray := strings.Split(args, ",")
-        // t.query(stub, stringArray)
+		array, err := stub.GetState(result.GetKey())
+		assetNames = append(assetNames, result.Key, string(array))
+	}
 
-    }
+	// Convert the asset names to JSON
+	assetNamesJSON, err := json.Marshal(assetNames)
+	if err != nil {
+		return shim.Error("Failed to marshal asset names to JSON")
+	}
 
-    // Convert the asset names to JSON
-    assetNamesJSON, err := json.Marshal(assetNames)
-    if err != nil {
-        return shim.Error("Failed to marshal asset names to JSON")
-    }
-
-    return shim.Success(assetNamesJSON)
+	return shim.Success(assetNamesJSON)
 }
 
 func (t *SimpleChaincode) ChangeUniversity(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -318,9 +313,6 @@ func (t *SimpleChaincode) ChangeUniversity(stub shim.ChaincodeStubInterface, arg
 
 	return shim.Success(nil)
 }
-
-
-
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))
