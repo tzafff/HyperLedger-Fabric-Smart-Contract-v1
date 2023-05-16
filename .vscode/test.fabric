@@ -1,0 +1,25 @@
+[
+    { 
+        "query": "query",
+        "args": ["Admin"]
+    },
+    {
+        "invoke": "create",
+        "args": ["Trainee","kyriakos","alevizos","uop","captureTheFlag","40%"]
+    },
+    {
+        "invoke": "delete",
+        "args": ["chris"]
+    },
+
+
+    { 
+        "invoke": "GetAllAsset",
+        "args": [""]
+    },
+    
+    { 
+        "invoke": "ChangeUniversity",
+        "args": ["Trainee","uoa"]
+    }
+]
