@@ -1,7 +1,7 @@
 [
     { 
         "query": "query",
-        "args": ["Admin"]
+        "args": ["Trainee"]
     },
     {
         "invoke": "create",
@@ -20,6 +20,6 @@
     
     { 
         "invoke": "ChangeUniversity",
-        "args": ["Trainee","uoa"]
+        "args": ["Admin","Trainee","uoi"]
     }
 ]

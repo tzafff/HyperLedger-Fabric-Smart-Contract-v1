@@ -277,15 +277,20 @@ func (t *SimpleChaincode) GetAllAsset(stub shim.ChaincodeStubInterface) pb.Respo
 }
 
 func (t *SimpleChaincode) ChangeUniversity(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3")
 	}
 
 	role := args[0]
-	newUniversity := args[1]
+	requester := args[1]
+	
+	if role != "Admin" {
+		return shim.Error("Not authorized role for that transaction")
+	}
+	newUniversity := args[2]
 
 	// Check if account exists
-	accountBytes, err := stub.GetState(role)
+	accountBytes, err := stub.GetState(requester)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -306,7 +311,7 @@ func (t *SimpleChaincode) ChangeUniversity(stub shim.ChaincodeStubInterface, arg
 	updatedData := strings.Join(fields, ",")
 
 	// Write the updated data to the ledger
-	err = stub.PutState(role, []byte(updatedData))
+	err = stub.PutState(requester, []byte(updatedData))
 	if err != nil {
 		return shim.Error(err.Error())
 	}
