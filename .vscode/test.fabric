@@ -1,30 +1,38 @@
 [
     {
-        "invoke": "getTrainee",
+        "invoke": "getIdentity",
         "args": ["Trainee"]
     },
     { 
-        "query": "getTrainee",
+        "query": "getIdentity",
         "args": ["Trainee"]
     },
     {
         "invoke": "createTrainee",
         "args": ["Trainee", "Chris", "Tzaferis", "EKPA"]
     },
+    {
+        "invoke": "createTrainer",
+        "args": ["Trainer", "Kyriakos", "Alevizos", "UOP"]
+    },
+    {
+        "invoke": "createVlab",
+        "args": ["ID1", "BOXNAME","HTTP","LINUX","DESC","100"]
+    },
     { 
         "invoke": "updateTraineeUniversity",
-        "args": ["Trainee", "University C"]
+        "args": ["Trainer","Trainee" ,"University D"]
     },
     { 
         "invoke": "addVLabToTrainee",
         "args": ["Trainee", "Hack The Box"]
     },
     {
-        "invoke": "delete",
-        "args": ["Trainee"]
+        "invoke": "ScoreTheVlab",
+        "args": ["Trainer","Trainee","Hack The Box","60%"]
     },
     {
-        "invoke": "ScoreTheVlab",
-        "args": ["Trainee","Hack The Box","60%"]
+        "invoke": "delete",
+        "args": ["Trainee"]
     }
 ]
