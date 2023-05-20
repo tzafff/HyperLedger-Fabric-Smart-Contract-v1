@@ -24,7 +24,7 @@ package main
 
 import (
 	"fmt"
-	
+
 	// "github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 
@@ -37,12 +37,19 @@ import (
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
 }
-
 type Trainee struct {
-	Name       string   `json:"name"`
-	Surname    string   `json:"surname"`
-	University string   `json:"university"`
-	VLab       []string `json:"vlab"`
+	Name       string
+	Surname    string
+	University string
+	VLab       []string
+}
+type VLabs struct {
+	BoxName     string
+	Domain      string
+	SystemType  string
+	Description string
+	ExpPoints   string
+	trainee     Trainee
 }
 
 /*
@@ -69,10 +76,57 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.delete(stub, args)
 	} else if function == "ScoreTheVlab" {
 		return t.ScoreTheVlab(stub, args)
+	} else if function == "createVlab" {
+		return t.createVlab(stub, args)
 	}
-	
 
 	return shim.Error("Invalid invoke function name. Expecting \"createTrainee\" \"getTrainee\" \"updateTraineeUniversity\" \"addVLabToTrainee\"")
+}
+
+func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 6 {
+		return shim.Error("Incorrect number of arguments. Expecting 5")
+	}
+
+	vLabID := args[0]
+	boxName := args[1]
+	domain := args[2]
+	systemType := args[3]
+	description := args[4]
+	expPoints := args[5]
+
+	// Check if trainee already exists
+	VLabBytes, err := stub.GetState(vLabID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if VLabBytes != nil {
+		return shim.Error("VLab already exists")
+	}
+
+	// Create a new VLab object
+	vLab := VLabs{
+		BoxName:     boxName,
+		Domain:      domain,
+		SystemType:  systemType,
+		Description: description,
+		ExpPoints:   expPoints,
+		trainee:     Trainee{},
+	}
+
+	// Convert trainee object to JSON
+	VLabJSON, err := json.Marshal(vLab)
+	if err != nil {
+		return shim.Error("Failed to marshal VLab to JSON")
+	}
+
+	// Save trainee JSON to the ledger
+	err = stub.PutState(vLabID, VLabJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
 }
 
 func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -84,7 +138,6 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 	name := args[1]
 	surname := args[2]
 	university := args[3]
-
 
 	// Check if trainee already exists
 	traineeBytes, err := stub.GetState(role)
@@ -101,7 +154,6 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 		Surname:    surname,
 		University: university,
 		VLab:       []string{},
-	
 	}
 
 	// Convert trainee object to JSON
@@ -180,7 +232,6 @@ func (t *SimpleChaincode) updateTraineeUniversity(stub shim.ChaincodeStubInterfa
 	return shim.Success(nil)
 }
 
-
 func (t *SimpleChaincode) addVLabToTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) != 2 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
@@ -240,7 +291,6 @@ func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string
 	return shim.Success(nil)
 }
 
-
 func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 3")
@@ -288,7 +338,6 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 
 	return shim.Success(nil)
 }
-
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))
