@@ -1,25 +1,30 @@
 [
+    {
+        "invoke": "getTrainee",
+        "args": ["Trainee"]
+    },
     { 
         "query": "getTrainee",
-        "args": ["trainee2"]
+        "args": ["Trainee"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["trainee2", "cHRIS", "TZAF", "EKPA", "Pass"]
+        "args": ["Trainee", "Chris", "Tzaferis", "EKPA"]
     },
-    {
-        "invoke": "getTrainee",
-        "args": ["trainee1"]
-    },
-
-
     { 
         "invoke": "updateTraineeUniversity",
-        "args": ["trainee1", "University C"]
+        "args": ["Trainee", "University C"]
     },
-
     { 
         "invoke": "addVLabToTrainee",
-        "args": ["trainee1", "Virtual Lab 2"]
+        "args": ["Trainee", "Hack The Box"]
+    },
+    {
+        "invoke": "delete",
+        "args": ["Trainee"]
+    },
+    {
+        "invoke": "ScoreTheVlab",
+        "args": ["Trainee","Hack The Box","60%"]
     }
 ]

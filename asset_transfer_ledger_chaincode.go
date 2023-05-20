@@ -43,7 +43,6 @@ type Trainee struct {
 	Surname    string   `json:"surname"`
 	University string   `json:"university"`
 	VLab       []string `json:"vlab"`
-	Result     string   `json:"result"`
 }
 
 /*
@@ -66,13 +65,18 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.updateTraineeUniversity(stub, args)
 	} else if function == "addVLabToTrainee" {
 		return t.addVLabToTrainee(stub, args)
+	} else if function == "delete" {
+		return t.delete(stub, args)
+	} else if function == "ScoreTheVlab" {
+		return t.ScoreTheVlab(stub, args)
 	}
+	
 
 	return shim.Error("Invalid invoke function name. Expecting \"createTrainee\" \"getTrainee\" \"updateTraineeUniversity\" \"addVLabToTrainee\"")
 }
 
 func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 5 {
+	if len(args) != 4 {
 		return shim.Error("Incorrect number of arguments. Expecting 5")
 	}
 
@@ -80,7 +84,7 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 	name := args[1]
 	surname := args[2]
 	university := args[3]
-	result := args[4]
+
 
 	// Check if trainee already exists
 	traineeBytes, err := stub.GetState(role)
@@ -97,7 +101,7 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 		Surname:    surname,
 		University: university,
 		VLab:       []string{},
-		Result:     result,
+	
 	}
 
 	// Convert trainee object to JSON
@@ -218,6 +222,73 @@ func (t *SimpleChaincode) addVLabToTrainee(stub shim.ChaincodeStubInterface, arg
 
 	return shim.Success(nil)
 }
+
+// Deletes an entity from state
+func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+
+	A := args[0]
+
+	// Delete the key from the state in ledger
+	err := stub.DelState(A)
+	if err != nil {
+		return shim.Error("Failed to delete state")
+	}
+
+	return shim.Success(nil)
+}
+
+
+func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3")
+	}
+
+	role := args[0]
+	vLabName := args[1]
+	score := args[2]
+
+	// Retrieve trainee from the ledger
+	traineeBytes, err := stub.GetState(role)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if traineeBytes == nil {
+		return shim.Error("Trainee does not exist")
+	}
+
+	// Unmarshal trainee JSON
+	trainee := Trainee{}
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error("Failed to unmarshal trainee JSON")
+	}
+
+	// Update the score of the specified virtual lab
+	for i, lab := range trainee.VLab {
+		if lab == vLabName {
+			trainee.VLab[i] = vLabName + " = " + score
+			break
+		}
+	}
+
+	// Convert trainee object to JSON
+	updatedTraineeJSON, err := json.Marshal(trainee)
+	if err != nil {
+		return shim.Error("Failed to marshal updated trainee to JSON")
+	}
+
+	// Save updated trainee JSON to the ledger
+	err = stub.PutState(role, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))
