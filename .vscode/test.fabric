@@ -4,8 +4,13 @@
         "args": ["Trainee"]
     },
     { 
+<<<<<<< HEAD
         "query": "getIdentity",
         "args": ["Trainee"]
+=======
+        "query": "getTrainee",
+        "args": ["ID1"]
+>>>>>>> 00ecf4e988b2ec94f013d912cd89ba4cc4e81db3
     },
     {
         "invoke": "createTrainee",
@@ -28,11 +33,24 @@
         "args": ["Trainee", "Hack The Box"]
     },
     {
+<<<<<<< HEAD
         "invoke": "ScoreTheVlab",
         "args": ["Trainer","Trainee","Hack The Box","60%"]
     },
     {
         "invoke": "delete",
         "args": ["Trainee"]
+=======
+        "invoke": "delete",
+        "args": ["ID1"]
+    },
+    {
+        "invoke": "ScoreTheVlab",
+        "args": ["Trainee","Hack The Box","60%"]
+    },
+    {
+        "invoke": "createVlab",
+        "args": ["ID1", "BOXNAME","HTTP","LINUX","DESC","100"]
+>>>>>>> 00ecf4e988b2ec94f013d912cd89ba4cc4e81db3
     }
 ]
