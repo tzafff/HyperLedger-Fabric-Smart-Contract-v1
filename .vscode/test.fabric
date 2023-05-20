@@ -1,25 +1,25 @@
 [
     { 
-        "query": "query",
-        "args": ["Trainee"]
+        "query": "getTrainee",
+        "args": ["trainee2"]
     },
     {
-        "invoke": "create",
-        "args": ["Trainee","kyriakos","alevizos","uop","captureTheFlag","40%"]
+        "invoke": "createTrainee",
+        "args": ["trainee2", "cHRIS", "TZAF", "EKPA", "Pass"]
     },
     {
-        "invoke": "delete",
-        "args": ["chris"]
+        "invoke": "getTrainee",
+        "args": ["trainee1"]
     },
 
 
     { 
-        "invoke": "GetAllAsset",
-        "args": [""]
+        "invoke": "updateTraineeUniversity",
+        "args": ["trainee1", "University C"]
     },
-    
+
     { 
-        "invoke": "ChangeUniversity",
-        "args": ["Admin","Trainee","uoi"]
+        "invoke": "addVLabToTrainee",
+        "args": ["trainee1", "Virtual Lab 2"]
     }
 ]
