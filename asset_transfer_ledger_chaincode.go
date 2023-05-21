@@ -38,13 +38,7 @@ import (
 type SimpleChaincode struct {
 }
 
-type Trainee struct {
-	Name       string   `json:"name"`
-	Surname    string   `json:"surname"`
-	University string   `json:"university"`
-	VLab       []string `json:"vlab"`
-	VLabs 		Vlab
-}
+
 
 type Trainer struct {
 	Name       string   `json:"name"`
@@ -59,6 +53,16 @@ type Vlab struct {
 	SystemType string
 	Description string
 	ExpPoints string
+	Trainees Trainee
+}
+
+
+type Trainee struct {
+	Name       string   `json:"name"`
+	Surname    string   `json:"surname"`
+	University string   `json:"university"`
+	VLab       []string `json:"vlab"`
+
 }
 
 /*
@@ -122,7 +126,6 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 		Surname:    surname,
 		University: university,
 		VLab:       []string{},
-		VLabs:      Vlab{},
 	}
 
 	// Convert trainee object to JSON
@@ -141,8 +144,8 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 }
 
 func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 4 {
-		return shim.Error("Incorrect number of arguments. Expecting 4")
+	if len(args) != 6 {
+		return shim.Error("Incorrect number of arguments. Expecting 6")
 	}
 
 	VlabID := args[0]
@@ -165,20 +168,22 @@ func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []st
 	// Create a new Vlab object
 	vlab := Vlab{
 		VlabID:       VlabID,
+		ExpPoints: ExpPoints,
 		SystemType:    SystemType,
 		Domain: Domain,
 		Description: Description,
 		Boxname: Boxname,
+		Trainees: Trainee{},
 	}
 
 	// Convert trainee object to JSON
-	trainerJSON, err := json.Marshal(vlab)
+	vlabJSON, err := json.Marshal(vlab)
 	if err != nil {
 		return shim.Error("Failed to marshal trainee to JSON")
 	}
 
 	// Save trainee JSON to the ledger
-	err = stub.PutState(role, trainerJSON)
+	err = stub.PutState(VlabID, vlabJSON)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
