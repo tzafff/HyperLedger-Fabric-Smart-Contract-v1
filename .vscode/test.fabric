@@ -5,15 +5,15 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["ID1"]
+        "args": ["dit170185"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["Trainee", "Chris", "Tzaferis", "EKPA"]
+        "args": ["dit170185", "Chris", "Tzaferis", "UOP"]
     },
     {
         "invoke": "createTrainer",
-        "args": ["Trainer", "Kyriakos", "Alevizos", "UOP"]
+        "args": ["dit17333", "Kyriakos", "Alevizos", "UOP"]
     },
     {
         "invoke": "createVlab",
@@ -24,8 +24,8 @@
         "args": ["Trainer","Trainee" ,"University D"]
     },
     { 
-        "invoke": "addVLabToTrainee",
-        "args": ["Trainee", "Hack The Box"]
+        "invoke": "addTraineeToVLab",
+        "args": ["dit17333", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
@@ -33,6 +33,6 @@
     },
     {
         "invoke": "delete",
-        "args": ["ID1"]
+        "args": ["dit170185"]
     }
 ]
