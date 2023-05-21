@@ -60,7 +60,6 @@ type Trainee struct {
 	Name       string   `json:"name"`
 	Surname    string   `json:"surname"`
 	University string   `json:"university"`
-	VLab       []string `json:"vlab"`
 	VLabs 		Vlab
 }
 
@@ -124,7 +123,6 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 		Name:       name,
 		Surname:    surname,
 		University: university,
-		VLab:       []string{},
 		VLabs:      Vlab{},
 	}
 
@@ -303,47 +301,7 @@ func (t *SimpleChaincode) updateTraineeUniversity(stub shim.ChaincodeStubInterfa
 }
 
 
-func (t *SimpleChaincode) addVLabToTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 2 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
-	}
 
-	role := args[0]
-	vLabName := args[1]
-
-	// Retrieve trainee from the ledger
-	traineeBytes, err := stub.GetState(role)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-	if traineeBytes == nil {
-		return shim.Error("Trainee does not exist")
-	}
-
-	// Unmarshal trainee JSON
-	trainee := Trainee{}
-	err = json.Unmarshal(traineeBytes, &trainee)
-	if err != nil {
-		return shim.Error("Failed to unmarshal trainee JSON")
-	}
-
-	// Add virtual lab name to trainee's list of virtual labs
-	trainee.VLab = append(trainee.VLab, vLabName)
-
-	// Convert trainee object to JSON
-	updatedTraineeJSON, err := json.Marshal(trainee)
-	if err != nil {
-		return shim.Error("Failed to marshal updated trainee to JSON")
-	}
-
-	// Save updated trainee JSON to the ledger
-	err = stub.PutState(role, updatedTraineeJSON)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
-	return shim.Success(nil)
-}
 
 // Deletes an entity from state
 func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string) pb.Response {
@@ -362,20 +320,13 @@ func (t *SimpleChaincode) delete(stub shim.ChaincodeStubInterface, args []string
 	return shim.Success(nil)
 }
 
-
-func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 4 {
-		return shim.Error("Incorrect number of arguments. Expecting 3")
+func (t *SimpleChaincode) addVLabToTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
-	trainerID := args[0]
-	role := args[1]
-	vLabName := args[2]
-	score := args[3]
 
-	// Add authorized validation
-	if(trainerID != "Trainer"){
-		return shim.Error("Not authorized for that transaction.")
-	}
+	role := args[0]
+	VLabName := args[1]
 
 	// Retrieve trainee from the ledger
 	traineeBytes, err := stub.GetState(role)
@@ -393,13 +344,24 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 		return shim.Error("Failed to unmarshal trainee JSON")
 	}
 
-	// Update the score of the specified virtual lab
-	for i, lab := range trainee.VLab {
-		if lab == vLabName {
-			trainee.VLab[i] = vLabName + " = " + score
-			break
-		}
+	// Retrieve the given Vlab from the ledger
+	vLabBytes, err := stub.GetState(VLabName)
+	if err != nil {
+		return shim.Error(err.Error())
 	}
+	if vLabBytes == nil {
+		return shim.Error("Vlab does not exist")
+	}
+
+	// Unmarshal the Vlab JSON
+	newVLab := Vlab{}
+	err = json.Unmarshal(vLabBytes, &newVLab)
+	if err != nil {
+		return shim.Error("Failed to unmarshal existing Vlab JSON")
+	}
+
+	// Add the  Vlab to the Trainee's VLab field
+	trainee.VLabs = newVLab
 
 	// Convert trainee object to JSON
 	updatedTraineeJSON, err := json.Marshal(trainee)
@@ -415,6 +377,59 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 
 	return shim.Success(nil)
 }
+
+
+func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 3 {
+		return shim.Error("Incorrect number of arguments. Expecting 3")
+	}
+
+	traineeKey := args[0]
+	vLabKey := args[1]
+	newExpPoints := args[2]
+
+	// Retrieve trainee from the ledger
+	traineeBytes, err := stub.GetState(traineeKey)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if traineeBytes == nil {
+		return shim.Error("Trainee does not exist")
+	}
+
+	// Unmarshal trainee JSON
+	trainee := Trainee{}
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error("Failed to unmarshal trainee JSON")
+	}
+
+	// Check if the Trainee has the specified Vlab
+	if trainee.VLabs.VlabID != vLabKey {
+		return shim.Error("Trainee does not have the specified Vlab")
+	}
+
+	// Update the ExpPoints of the Vlab
+	trainee.VLabs.ExpPoints = newExpPoints
+
+	// Convert trainee object to JSON
+	updatedTraineeJSON, err := json.Marshal(trainee)
+	if err != nil {
+		return shim.Error("Failed to marshal updated trainee to JSON")
+	}
+
+	// Save updated trainee JSON to the ledger
+	err = stub.PutState(traineeKey, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
+
+
+
 
 
 func main() {
