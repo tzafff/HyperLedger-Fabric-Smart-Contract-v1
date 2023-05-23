@@ -89,6 +89,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.createTrainer(stub, args)
 	} else if function == "createVlab" {
 		return t.createVlab(stub, args)
+	} else if function == "getAllAsset" {
+		return t.getAllAsset(stub, args)
 	}
 
 	return shim.Error("Invalid invoke function name. Expecting \"createTrainee\" \"getTrainee\" \"updateTraineeUniversity\" \"addVLabToTrainee\"")
@@ -384,6 +386,27 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 		return shim.Error("Not authorized for that transaction.")
 	}
 
+	// Retrieve trainee from the ledger
+	traineeBytes, err := stub.GetState(traineeID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if traineeBytes == nil {
+		return shim.Error("Trainee does not exist")
+	}
+
+	// Unmarshal trainee JSON
+	trainee := Trainee{}
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error("Failed to unmarshal trainee JSON")
+	}
+
+	// Update trainee's university
+	trainee.VlabPoints = vlabPoints
+
+
+
 	// Retrieve the Vlab from the ledger
 	vlabBytes, err := stub.GetState(vlabID)
 	if err != nil {
@@ -414,6 +437,17 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 		return shim.Error("Trainee not found in Vlab")
 	}
 
+	updatedTraineeJSON, err := json.Marshal(trainee)
+	if err != nil {
+		return shim.Error("Failed to marshal updated trainee to JSON")
+	}
+
+	// Save updated trainee JSON to the ledger
+	err = stub.PutState(traineeID, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	// Convert the updated Vlab object to JSON
 	updatedVlabJSON, err := json.Marshal(vlab)
 	if err != nil {
@@ -427,6 +461,33 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 	}
 
 	return shim.Success(nil)
+}
+
+func (t *SimpleChaincode) getAllAsset(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// Retrieve all assets from the ledger
+	resultsIterator, err := stub.GetStateByRange("", "")
+	if err != nil {
+		return shim.Error("Failed to get assets")
+	}
+	defer resultsIterator.Close()
+
+	// Iterate over the result set and collect the assets
+	var assets []string
+	for resultsIterator.HasNext() {
+		queryResult, err := resultsIterator.Next()
+		if err != nil {
+			return shim.Error("Failed to iterate over assets")
+		}
+		assets = append(assets, string(queryResult.Value))
+	}
+
+	// Convert assets to JSON
+	assetsJSON, err := json.Marshal(assets)
+	if err != nil {
+		return shim.Error("Failed to marshal assets to JSON")
+	}
+
+	return shim.Success(assetsJSON)
 }
 
 
