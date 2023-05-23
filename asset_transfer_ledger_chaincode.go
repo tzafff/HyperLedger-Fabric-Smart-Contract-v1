@@ -28,6 +28,7 @@ import (
 	// "github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 
+
 	// pb "github.com/hyperledger/fabric/protos/peer"
 	"encoding/json"
 
@@ -91,7 +92,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.createVlab(stub, args)
 	} else if function == "getAllAsset" {
 		return t.getAllAsset(stub, args)
+	} else if function == "TransferTrainee" {
+		return t.TransferTrainee(stub, args)
 	}
+	
 
 	return shim.Error("Invalid invoke function name. Expecting \"createTrainee\" \"getTrainee\" \"updateTraineeUniversity\" \"addVLabToTrainee\"")
 }
@@ -490,6 +494,119 @@ func (t *SimpleChaincode) getAllAsset(stub shim.ChaincodeStubInterface, args []s
 	return shim.Success(assetsJSON)
 }
 
+
+func (t *SimpleChaincode) TransferTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 4 {
+		return shim.Error("Incorrect number of arguments. Expecting 4")
+	}
+
+	trainerID := args[0]
+	traineeID := args[1]
+	from_Vlab := args[2]
+	to_Vlab := args[3]
+
+	// Add authorized validation
+	if trainerID != "Trainer" {
+		return shim.Error("Not authorized for that transaction.")
+	}
+
+	
+	// Retrieve trainee from the ledger
+	traineeBytes, err := stub.GetState(traineeID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if traineeBytes == nil {
+		return shim.Error("Trainee does not exist")
+	}
+
+	// Unmarshal trainee JSON
+	trainee := Trainee{}
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error("Failed to unmarshal trainee JSON")
+	}
+
+
+	// Retrieve the from Vlab from the ledger
+	from_vlabBytes, err := stub.GetState(from_Vlab)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if from_vlabBytes == nil {
+		return shim.Error("Vlab does not exist")
+	}
+
+	// Unmarshal the from Vlab JSON
+	vlab1 := Vlab{}
+	err = json.Unmarshal(from_vlabBytes, &vlab1)
+	if err != nil {
+		return shim.Error("Failed to unmarshal from Vlab JSON")
+	}
+
+
+	// Retrieve the to Vlab from the ledger
+	to_vlabBytes, err := stub.GetState(to_Vlab)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if to_vlabBytes == nil {
+		return shim.Error("Vlab does not exist")
+	}
+
+	// Unmarshal the to Vlab JSON
+	vlab2 := Vlab{}
+	err = json.Unmarshal(to_vlabBytes, &vlab2)
+	if err != nil {
+		return shim.Error("Failed to unmarshal to Vlab JSON")
+	}
+
+	// Find the trainee within the Vlab
+	var found bool
+	var indexToRemove int 
+	for i, trainee := range vlab1.Trainees {
+		if trainee.TraineeID == traineeID {
+			indexToRemove = i
+			found = true
+			break
+		}
+	}
+
+	vlab1.Trainees = append(vlab1.Trainees[:indexToRemove],vlab1.Trainees[indexToRemove+1:]... )
+
+
+	vlab2.Trainees = append(vlab2.Trainees, trainee)
+	if !found {
+		return shim.Error("Trainee not found in Vlab")
+	}
+
+
+	// Convert the updated from Vlab object to JSON
+	updatedVlab1JSON, err := json.Marshal(vlab1)
+	if err != nil {
+		return shim.Error("Failed to marshal updated Vlab to JSON")
+	}
+
+	// Save the updated from Vlab JSON to the ledger
+	err = stub.PutState(from_Vlab, updatedVlab1JSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Convert the updated to Vlab object to JSON
+	updatedVlab2JSON, err := json.Marshal(vlab2)
+	if err != nil {
+		return shim.Error("Failed to marshal updated Vlab to JSON")
+	}
+
+	// Save the updated to Vlab JSON to the ledger
+	err = stub.PutState(to_Vlab, updatedVlab2JSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))
