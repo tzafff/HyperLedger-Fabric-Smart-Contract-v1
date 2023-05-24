@@ -13,7 +13,7 @@
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170186", "Chris", "Tzaferis", "UOP"]
+        "args": ["dit170185", "Kyriakos", "Alevizos", "UOP"]
     },
     {
         "invoke": "createTrainer",
@@ -21,7 +21,7 @@
     },
     {
         "invoke": "createVlab",
-        "args": ["ID2", "LINUX","70","Malware Analysis","DESCRIPTION2","BOXNAME2"]
+        "args": ["ID2", "Windows","70","  Analysis","DESCRIPTION2","BOXNAME2"]
     },
     { 
         "invoke": "updateTraineeUniversity",
@@ -29,18 +29,18 @@
     },
     { 
         "invoke": "addTraineeToVLab",
-        "args": ["dit170186", "ID2"]
+        "args": ["dit170185", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
-        "args": ["Trainer","dit170186","ID1","99%"]
+        "args": ["Trainer","dit170185","ID2","93%"]
     },
     {
         "invoke": "TransferTrainee",
-        "args": ["Trainer","dit170186","ID1","ID2"]
+        "args": ["Trainer","dit170185","ID1","ID2"]
     },
     {
         "invoke": "delete",
-        "args": ["ID2"]
+        "args": ["dit170185"]
     }
 ]
