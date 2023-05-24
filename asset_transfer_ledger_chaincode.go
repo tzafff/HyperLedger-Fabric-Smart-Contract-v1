@@ -55,12 +55,12 @@ type Vlab struct {
 }
 
 type Trainee struct {
-	TraineeID  string
-	Name       string `json:"name"`
-	Surname    string `json:"surname"`
-	University string `json:"university"`
-	VlabPoints string
-	ActiveVlab string
+	TraineeID     string
+	Name          string `json:"name"`
+	Surname       string `json:"surname"`
+	University    string `json:"university"`
+	ActiveVlab    string
+	VlabPointsMap map[string]string `json:"vlabPoints"`
 }
 
 /*
@@ -121,10 +121,11 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 
 	// Create a new trainee object
 	trainee := Trainee{
-		TraineeID:  role,
-		Name:       name,
-		Surname:    surname,
-		University: university,
+		TraineeID:     role,
+		Name:          name,
+		Surname:       surname,
+		University:    university,
+		VlabPointsMap: make(map[string]string),
 	}
 
 	// Convert trainee object to JSON
@@ -162,7 +163,7 @@ func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []st
 		return shim.Error(err.Error())
 	}
 	if vlabsBytes != nil {
-		return shim.Error("Vlab already exists")
+		return shim.Error("Vlab does not exists")
 	}
 
 	// Create a new Vlab object
@@ -230,7 +231,7 @@ func (t *SimpleChaincode) addTraineeToVLab(stub shim.ChaincodeStubInterface, arg
 
 	for _, val := range vlab.Trainees {
 		if val.TraineeID == role {
-			return shim.Error("Traine is already exists in Vlab with Id %d")
+			return shim.Error("Trainee already exists in Vlab ")
 		}
 	}
 
@@ -422,9 +423,8 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 		return shim.Error("Failed to unmarshal trainee JSON")
 	}
 
-	// Update trainee's university
-	trainee.VlabPoints = vlabPoints
-
+	// Update trainee's vlab points
+	trainee.VlabPointsMap[vlabID] = vlabPoints
 	// Retrieve the Vlab from the ledger
 	vlabBytes, err := stub.GetState(vlabID)
 	if err != nil {
@@ -441,11 +441,11 @@ func (t *SimpleChaincode) ScoreTheVlab(stub shim.ChaincodeStubInterface, args []
 		return shim.Error("Failed to unmarshal Vlab JSON")
 	}
 
-	// Find the trainee within the Vlab
+	// Find the trainee within the Vlab and scor the vlab
 	var found bool
 	for i, trainee := range vlab.Trainees {
 		if trainee.TraineeID == traineeID {
-			vlab.Trainees[i].VlabPoints = vlabPoints
+			vlab.Trainees[i].VlabPointsMap[vlabID] = vlabPoints
 			found = true
 			break
 		}
