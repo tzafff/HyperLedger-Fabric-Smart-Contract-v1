@@ -9,7 +9,7 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["ID2"]
+        "args": ["ID1"]
     },
     {
         "invoke": "createTrainee",
@@ -20,15 +20,15 @@
         "args": ["Trainer", "Kyriakos", "Alevizos", "UOP"]
     },
     {
-        "invoke": "createVlab",
-        "args": ["ID2", "Windows","70","  Analysis","DESCRIPTION2","BOXNAME2"]
+        "invoke": "createPlatform",
+        "args": ["ID2", "Windows","50","Malware  Analysis","DESCRIPTION2","BOXNAME2"]
     },
     { 
         "invoke": "updateTraineeUniversity",
         "args": ["Trainer","Trainee" ,"University D"]
     },
     { 
-        "invoke": "addTraineeToVLab",
+        "invoke": "addTraineeToPlatform",
         "args": ["dit170185", "ID1"]
     },
     {
@@ -37,10 +37,10 @@
     },
     {
         "invoke": "TransferTrainee",
-        "args": ["Trainer","dit170185","ID1","ID2"]
+        "args": ["Trainer","dit170185","ID2","ID1"]
     },
     {
         "invoke": "delete",
-        "args": ["dit170185"]
+        "args": ["dit170186"]
     }
 ]
