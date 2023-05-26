@@ -106,7 +106,11 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.createVlab(stub, args)
 	} else if function == "addVlabToTrainee" {
 		return t.addVlabToTrainee(stub, args)
+	} else if function == "deleteTraineeFromPlatform" {
+		return t.deleteTraineeFromPlatform(stub, args)
 	}
+
+	
 
 	return shim.Error("Invalid invoke function name. Expecting \"createTrainee\" \"getTrainee\" \"updateTraineeUniversity\" \"addVLabToTrainee\"")
 }
@@ -741,6 +745,21 @@ func (t *SimpleChaincode) addVlabToTrainee(stub shim.ChaincodeStubInterface, arg
 		return shim.Error(err.Error())
 	}
 
+
+
+	// Get the existing platform from the ledger
+	platformBytes, err := stub.GetState(trainee.ActivePlatform)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	
+	// Unmarshal the platform JSON
+	var platform Platform
+	err = json.Unmarshal(platformBytes, &platform)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
 	
 
 	// Check if the Vlab already exists in the Trainee's VlabPointsMap
@@ -751,6 +770,15 @@ func (t *SimpleChaincode) addVlabToTrainee(stub shim.ChaincodeStubInterface, arg
 	// Add the Vlab to the Trainee's VlabPointsMap
 	trainee.VlabPointsMap2[vlabID] = vlab
 
+
+	for i, trainee := range platform.Trainees {
+		if trainee.TraineeID == traineeID {
+			platform.Trainees[i].VlabPointsMap2[vlabID] = vlab
+			break
+		}
+	}
+
+
 	// Convert the updated trainee to JSON
 	updatedTraineeJSON, err := json.Marshal(trainee)
 	if err != nil {
@@ -759,6 +787,103 @@ func (t *SimpleChaincode) addVlabToTrainee(stub shim.ChaincodeStubInterface, arg
 
 	// Store the updated trainee in the ledger
 	err = stub.PutState(traineeID, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+
+	// Convert the updated platform to JSON
+	updatedPlatformJSON, err := json.Marshal(platform)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Store the updated trainee in the ledger
+	err = stub.PutState(trainee.ActivePlatform, updatedPlatformJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
+func (t *SimpleChaincode) deleteTraineeFromPlatform(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting 2")
+	}
+
+	traineeID := args[0]
+	platformID := args[1]
+
+	// Retrieve trainee from the ledger
+	traineeBytes, err := stub.GetState(traineeID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if traineeBytes == nil {
+		return shim.Error("TraineeID does not exist")
+	}
+
+	// Unmarshal trainee JSON
+	trainee := Trainee{}
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error("Failed to unmarshal trainee JSON")
+	}
+
+	// Check if the trainee is registered in the specified platform
+	if trainee.ActivePlatform != platformID {
+		return shim.Error("Trainee is not registered in the specified platform")
+	}
+
+	// Retrieve the platform from the ledger
+	platformBytes, err := stub.GetState(platformID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if platformBytes == nil {
+		return shim.Error("PlatformID does not exist")
+	}
+
+	// Unmarshal platform JSON
+	platform := Platform{}
+	err = json.Unmarshal(platformBytes, &platform)
+	if err != nil {
+		return shim.Error("Failed to unmarshal platform JSON")
+	}
+
+	// Remove the trainee from the platform's Trainees list
+	updatedTrainees := make([]Trainee, 0)
+	for _, trainee := range platform.Trainees {
+		if trainee.TraineeID != traineeID {
+			updatedTrainees = append(updatedTrainees, trainee)
+		}
+	}
+	platform.Trainees = updatedTrainees
+
+	// Update the trainee's active platform to empty
+	trainee.ActivePlatform = ""
+
+	// Convert trainee object to JSON
+	updatedTraineeJSON, err := json.Marshal(trainee)
+	if err != nil {
+		return shim.Error("Failed to marshal updated trainee to JSON")
+	}
+
+	// Save updated trainee JSON to the ledger
+	err = stub.PutState(traineeID, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Convert platform object to JSON
+	updatedPlatformJSON, err := json.Marshal(platform)
+	if err != nil {
+		return shim.Error("Failed to marshal updated platform to JSON")
+	}
+
+	// Save updated platform JSON to the ledger
+	err = stub.PutState(platformID, updatedPlatformJSON)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
