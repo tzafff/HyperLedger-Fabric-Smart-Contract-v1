@@ -9,11 +9,11 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["dit170189"]
+        "args": ["ID1"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170189", "GOUSOU", "Christos", "UOP"]
+        "args": ["dit170185", "GOUSOU", "Christos", "UOP"]
     },
     {
         "invoke": "createTrainer",
@@ -29,30 +29,30 @@
     },
     { 
         "invoke": "addTraineeToPlatform",
-        "args": ["dit170189", "ID2"]
+        "args": ["dit170185", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
-        "args": ["Trainer","dit170185","ID2","93%"]
+        "args": ["Trainer","dit170185","vlab4","93%"]
     },
     {
         "invoke": "TransferTrainee",
-        "args": ["Trainer","dit170189","ID1","ID2"]
+        "args": ["Trainer","dit170185","ID2","ID1"]
     },
     {
         "invoke": "delete",
-        "args": ["dit170185"]
+        "args": ["vlab5"]
     }, 
     {
         "invoke": "addVlabToTrainee",
-        "args": ["dit170189","vlab3"]
+        "args": ["dit170185","vlab4"]
     }, 
     {
         "invoke": "createVlab",
-        "args": ["vlab3","70"]
+        "args": ["vlab4","50"]
     }, 
     {
         "invoke": "deleteTraineeFromPlatform",
-        "args": ["dit170186","ID2"]
+        "args": ["dit170189","ID2"]
     }
 ]
