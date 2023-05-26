@@ -60,7 +60,14 @@ type Trainee struct {
 	Surname       		string `json:"surname"`
 	University    		string `json:"university"`
 	ActivePlatform    	string
-	VlabPointsMap 		map[string]string `json:"vlabPoints"`
+	//VlabPointsMap 		map[string]string `json:"vlabPoints"`
+	VlabPointsMap2 map[string]Vlab    `json:"Trainee_vlabs"`
+}
+
+type Vlab struct {
+	VlabID string `json:"vlabID"`
+	Ects string
+	// Add other fields as needed
 }
 
 /*
@@ -95,6 +102,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.getAllAsset(stub, args)
 	} else if function == "TransferTrainee" {
 		return t.TransferTrainee(stub, args)
+	} else if function == "createVlab" {
+		return t.createVlab(stub, args)
+	} else if function == "addVlabToTrainee" {
+		return t.addVlabToTrainee(stub, args)
 	}
 
 	return shim.Error("Invalid invoke function name. Expecting \"createTrainee\" \"getTrainee\" \"updateTraineeUniversity\" \"addVLabToTrainee\"")
@@ -125,7 +136,8 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 		Name:          name,
 		Surname:       surname,
 		University:    university,
-		VlabPointsMap: make(map[string]string),
+		//VlabPointsMap: make(map[string]string),
+		VlabPointsMap2: make(map[string]Vlab),
 	}
 
 	// Convert trainee object to JSON
@@ -636,6 +648,124 @@ func (t *SimpleChaincode) TransferTrainee(stub shim.ChaincodeStubInterface, args
 
 	return shim.Success(nil)
 }
+
+func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// Check the number of arguments
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting vlabID")
+	}
+
+	// Extract the vlabID from the argument
+	vlabID := args[0]
+	ects :=args[1]
+
+	// Check if the Vlab already exists in the ledger
+	vlabBytes, err := stub.GetState(vlabID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if vlabBytes != nil {
+		return shim.Error("Vlab with ID "+vlabID+" already exists")
+	}
+
+	// Create a new Vlab instance
+	vlab := Vlab{
+		VlabID: vlabID,
+		Ects:  ects,
+		// Set other fields as needed
+	}
+
+	// Convert the Vlab instance to JSON
+	vlabJSON, err := json.Marshal(vlab)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Store the Vlab JSON in the ledger
+	err = stub.PutState(vlabID, vlabJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
+func (t *SimpleChaincode) addVlabToTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	// Check the number of arguments
+	if len(args) != 2 {
+		return shim.Error("Incorrect number of arguments. Expecting traineeID and vlabID")
+	}
+
+	// Extract the traineeID and vlabID from arguments
+	traineeID := args[0]
+	vlabID := args[1]
+
+	// Get the existing trainee from the ledger
+	traineeBytes, err := stub.GetState(traineeID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Check if the trainee exists
+	if traineeBytes == nil {
+		return shim.Error("Trainee with ID "+traineeID+" does not exist")
+	}
+
+	// Unmarshal the trainee JSON
+	var trainee Trainee
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	if trainee.ActivePlatform == "" {
+		return shim.Error("Trainee need to be registered in platform in order to add a vlab")
+	}
+	
+
+	// Get the existing vlab from the ledger
+	vlabBytes, err := stub.GetState(vlabID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Check if the vlab exists
+	if vlabBytes == nil {
+		return shim.Error("Vlab with ID "+vlabID+" does not exist")
+	}
+
+	// Unmarshal the vlab JSON
+	var vlab Vlab
+	err = json.Unmarshal(vlabBytes, &vlab)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	
+
+	// Check if the Vlab already exists in the Trainee's VlabPointsMap
+	if _, exists := trainee.VlabPointsMap2[vlabID]; exists {
+		return shim.Error("Vlab with ID "+vlabID+" already exists for trainee with ID "+ vlabID)
+	}
+
+	// Add the Vlab to the Trainee's VlabPointsMap
+	trainee.VlabPointsMap2[vlabID] = vlab
+
+	// Convert the updated trainee to JSON
+	updatedTraineeJSON, err := json.Marshal(trainee)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Store the updated trainee in the ledger
+	err = stub.PutState(traineeID, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))

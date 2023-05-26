@@ -9,19 +9,19 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["ID1"]
+        "args": ["dit170185"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170185", "Kyriakos", "Alevizos", "UOP"]
+        "args": ["dit170187", "GOUSOU", "Christos", "UOP"]
     },
     {
         "invoke": "createTrainer",
-        "args": ["Trainer", "Kyriakos", "Alevizos", "UOP"]
+        "args": ["Trainer", "Nikolaos", "Kolokotronis", "UOP"]
     },
     {
         "invoke": "createPlatform",
-        "args": ["ID2", "Windows","50","Malware  Analysis","DESCRIPTION2","BOXNAME2"]
+        "args": ["ID1", "Linux","60","Spy  Analysis","DESCRIPTION1","BOXNAME1"]
     },
     { 
         "invoke": "updateTraineeUniversity",
@@ -29,7 +29,7 @@
     },
     { 
         "invoke": "addTraineeToPlatform",
-        "args": ["dit170185", "ID1"]
+        "args": ["dit170186", "ID2"]
     },
     {
         "invoke": "ScoreTheVlab",
@@ -41,6 +41,14 @@
     },
     {
         "invoke": "delete",
-        "args": ["dit170186"]
+        "args": ["Trainer"]
+    }, 
+    {
+        "invoke": "addVlabToTrainee",
+        "args": ["dit170185","vlab1"]
+    }, 
+    {
+        "invoke": "createVlab",
+        "args": ["vlab3","70"]
     }
 ]
