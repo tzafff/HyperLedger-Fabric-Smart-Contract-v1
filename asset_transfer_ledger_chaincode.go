@@ -49,29 +49,36 @@ type Trainer struct {
 }
 
 type Platform struct {
-	PlatformID  string
-	Boxname     string
-	Domain      string
-	SystemType  string
-	Description string
-	ExpPoints   string
-	Trainees    []Trainee
+	PlatformID  	string
+	PlatformName 	string
+	EmailAddress 	string				
+	City 			string
+	Description 	string
+	Trainees    	[]Trainee
 }
 
 type Trainee struct {
 	TraineeID     		string
-	Name          		string `json:"name"`
-	Surname       		string `json:"surname"`
-	University    		string `json:"university"`
+	FirstName    		string 
+	LastName     		string 
+	EmailAddress 		string 
+	City  				string
+	Description         string
+	Nickname 			string
 	ActivePlatform    	string
-	//VlabPointsMap 		map[string]string `json:"vlabPoints"`
 	VlabPointsMap2 map[string]Vlab    `json:"Trainee_vlabs"`
 }
 
 type Vlab struct {
-	VlabID string `json:"vlabID"`
-	Ects string
-	Result string
+	VlabID 			string `json:"vlabID"`
+	BoxName 		string
+    Domain 			string
+    SystemType 		string
+    Description 	string
+    ExpPoints 		string
+    BoxDifficulty  	string
+    TimeNeeded 		string
+	Result 			string
 	// Add other fields as needed
 }
 
@@ -111,8 +118,6 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.createTrainee(stub, args)
 	} else if function == "getIdentity" {
 		return t.getIdentity(stub, args)
-	} else if function == "updateTraineeUniversity" {
-		return t.updateTraineeUniversity(stub, args)
 	} else if function == "addTraineeToPlatform" {
 		return t.addTraineeToPlatform(stub, args)
 	} else if function == "delete" {
@@ -145,14 +150,17 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 4 {
+	if len(args) != 7 {
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 
 	traineeID := args[0]
-	name := args[1]
-	surname := args[2]
-	university := args[3]
+	firstName := args[1]
+	lastName := args[2]
+	emailAddress := args[3]
+	city := args[4]
+	description := args[5]
+	nickname := args[6]
 
 	// Check if trainee already exists
 	traineeBytes, err := stub.GetState(traineeID)
@@ -165,10 +173,13 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 
 	// Create a new trainee object
 	trainee := Trainee{
-		TraineeID:     traineeID,
-		Name:          name,
-		Surname:       surname,
-		University:    university,
+		TraineeID:     	traineeID,
+		FirstName:      firstName,
+		LastName:       lastName,
+		EmailAddress:   emailAddress,
+		City:    		city,
+		Description:    description,
+		Nickname:    	nickname,
 		//VlabPointsMap: make(map[string]string),
 		VlabPointsMap2: make(map[string]Vlab),
 	}
@@ -189,20 +200,19 @@ func (t *SimpleChaincode) createTrainee(stub shim.ChaincodeStubInterface, args [
 }
 
 func (t *SimpleChaincode) createPlatform(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 6 {
+	if len(args) != 5 {
 		return shim.Error("Incorrect number of arguments. Expecting 6")
 	}
 
 	
-	PlatformID := args[0]
-	SystemType := args[1]
-	ExpPoints := args[2]
-	Domain := args[3]
-	Description := args[4]
-	Boxname := args[5]
+	platformID := args[0]
+	platformName := args[1]
+	emailAddress := args[2]
+	city := args[3]
+	description := args[4]
 
 	// Check if platform exists
-	platformBytes, err := stub.GetState(PlatformID)
+	platformBytes, err := stub.GetState(platformID)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -212,12 +222,11 @@ func (t *SimpleChaincode) createPlatform(stub shim.ChaincodeStubInterface, args 
 
 	// Create a new Platform object
 	platform := Platform{
-		PlatformID:  PlatformID,
-		ExpPoints:   ExpPoints,
-		SystemType:  SystemType,
-		Domain:      Domain,
-		Description: Description,
-		Boxname:     Boxname,
+		PlatformID:  platformID,
+		PlatformName:   platformName,
+		EmailAddress:  emailAddress,
+		City:      city,
+		Description: description,
 		Trainees:    []Trainee{},
 	}
 
@@ -228,7 +237,7 @@ func (t *SimpleChaincode) createPlatform(stub shim.ChaincodeStubInterface, args 
 	}
 
 	// Save Platform JSON to the ledger
-	err = stub.PutState(PlatformID, platformJSON)
+	err = stub.PutState(platformID, platformJSON)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -377,53 +386,6 @@ func (t *SimpleChaincode) getIdentity(stub shim.ChaincodeStubInterface, args []s
 	}
 
 	return shim.Success(identityBytes)
-}
-
-func (t *SimpleChaincode) updateTraineeUniversity(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 3 {
-		return shim.Error("Incorrect number of arguments. Expecting 2")
-	}
-	trainerID := args[0]
-	role := args[1]
-	newUniversity := args[2]
-
-	// Add authorized validation
-	if trainerID != "Trainer" {
-		return shim.Error("Not authorized for that transaction.")
-	}
-
-	// Retrieve trainee from the ledger
-	traineeBytes, err := stub.GetState(role)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-	if traineeBytes == nil {
-		return shim.Error("TraineeID does not exist")
-	}
-
-	// Unmarshal trainee JSON
-	trainee := Trainee{}
-	err = json.Unmarshal(traineeBytes, &trainee)
-	if err != nil {
-		return shim.Error("Failed to unmarshal trainee JSON")
-	}
-
-	// Update trainee's university
-	trainee.University = newUniversity
-
-	// Convert trainee object to JSON
-	updatedTraineeJSON, err := json.Marshal(trainee)
-	if err != nil {
-		return shim.Error("Failed to marshal updated trainee to JSON")
-	}
-
-	// Save updated trainee JSON to the ledger
-	err = stub.PutState(role, updatedTraineeJSON)
-	if err != nil {
-		return shim.Error(err.Error())
-	}
-
-	return shim.Success(nil)
 }
 
 // Deletes an entity from state
@@ -707,13 +669,19 @@ func (t *SimpleChaincode) TransferTrainee(stub shim.ChaincodeStubInterface, args
 
 func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// Check the number of arguments
-	if len(args) != 2 {
+	if len(args) != 8 {
 		return shim.Error("Incorrect number of arguments. Expecting vlabID")
 	}
 
 	// Extract the vlabID from the argument
 	vlabID := args[0]
-	ects :=args[1]
+	boxName :=args[1]
+	domain := args[2]
+	systemType :=args[3]
+	description :=args[4]
+	expPoints :=args[5]
+	boxDifficulty :=args[6]
+	timeNeeded :=args[7]
 
 	// Check if the Vlab already exists in the ledger
 	vlabBytes, err := stub.GetState(vlabID)
@@ -727,8 +695,13 @@ func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []st
 	// Create a new Vlab instance
 	vlab := Vlab{
 		VlabID: vlabID,
-		Ects:  ects,
-		// Set other fields as needed
+		BoxName:  boxName,
+		Domain: domain,
+		SystemType:  systemType,
+		Description:  description,
+		ExpPoints:  expPoints,
+		BoxDifficulty:  boxDifficulty,
+		TimeNeeded:  timeNeeded,
 	}
 
 	// Convert the Vlab instance to JSON

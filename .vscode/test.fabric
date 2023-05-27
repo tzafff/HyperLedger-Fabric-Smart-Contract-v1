@@ -1,7 +1,7 @@
 [
     {
         "invoke": "getIdentity",
-        "args": ["dit170186"]
+        "args": ["vlab1"]
     },
     {
         "query": "getAllAsset",
@@ -9,39 +9,35 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["trainerID"]
+        "args": ["ID1"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170186", "kyriakos", "Alev", "UOP"]
+        "args": ["dit170185", "christos", "tzaferis", "email","city","desc","nickname"]
     },
     {
         "invoke": "createTrainer",
-        "args": ["trainerID", "Nikolaos", "Kolokotronis","email","city","desc","nickname"]
+        "args": ["Trainer", "Nikolaos", "Kolokotronis","email","city","desc","nickname"]
     },
     {
         "invoke": "createPlatform",
-        "args": ["ID2", "Windows","40","Malware  Analysis","DESCRIPTION2","BOXNAME2"]
-    },
-    { 
-        "invoke": "updateTraineeUniversity",
-        "args": ["Trainer","Trainee" ,"University D"]
+        "args": ["ID2", "Try hack me","email","city","description"]
     },
     { 
         "invoke": "addTraineeToPlatform",
-        "args": ["dit170186", "ID1"]
+        "args": ["dit170185", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
-        "args": ["Trainer","dit170185","vlab2","53%"]
+        "args": ["Trainer","dit170184","vlab2","99%"]
     },
     {
         "invoke": "TransferTrainee",
-        "args": ["Trainer","dit170185","ID1","ID2"]
+        "args": ["Trainer","dit170184","ID1","ID2"]
     },
     {
         "invoke": "delete",
-        "args": ["admin1"]
+        "args": ["trainerID"]
     }, 
     {
         "invoke": "addVlabToTrainee",
@@ -49,7 +45,7 @@
     }, 
     {
         "invoke": "createVlab",
-        "args": ["vlab3","40"]
+        "args": ["vlab2","Boxname","Domain","SystemType","Description","ExpPoints","BoxDifficulty","Timeneeded"]
     }, 
     {
         "invoke": "deleteTraineeFromPlatform",
