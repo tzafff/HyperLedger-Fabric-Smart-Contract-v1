@@ -39,9 +39,13 @@ type SimpleChaincode struct {
 }
 
 type Trainer struct {
-	Name       string `json:"name"`
-	Surname    string `json:"surname"`
-	University string `json:"university"`
+	TrainerID    	string
+	FirstName		string
+	LastName		string
+	EmailAddress	string
+	City			string
+	Description 	string
+	Nickname 		string
 }
 
 type Platform struct {
@@ -69,6 +73,26 @@ type Vlab struct {
 	Ects string
 	Result string
 	// Add other fields as needed
+}
+
+type Administrator struct{
+	AdministratorID string
+	FirstName		string
+	LastName		string
+	EmailAddress	string			
+	City			string
+	Description 	string
+	Nickname 		string
+}
+
+type VlabOwner struct{
+	VLabOwnerID		string
+	FirstName		string
+	LastName		string
+    EmailAddress	string
+    City			string
+	Description 	string
+	Nickname 		string
 }
 
 /*
@@ -109,6 +133,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.addVlabToTrainee(stub, args)
 	} else if function == "deleteTraineeFromPlatform" {
 		return t.deleteTraineeFromPlatform(stub, args)
+	} else if function == "createAdministrator" {
+		return t.createAdministrator(stub, args)
+	} else if function == "createVlabOwner" {
+		return t.createVlabOwner(stub, args)
 	}
 
 	
@@ -285,17 +313,20 @@ func (t *SimpleChaincode) addTraineeToPlatform(stub shim.ChaincodeStubInterface,
 }
 
 func (t *SimpleChaincode) createTrainer(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 4 {
+	if len(args) != 7 {
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 
-	role := args[0]
-	name := args[1]
-	surname := args[2]
-	university := args[3]
+	trainerID := args[0]
+	firstName := args[1]
+	lastName := args[2]
+	emailAddress := args[3]
+	city := args[4]
+	description := args[5]
+	nickname := args[6]
 
 	// Check if trainer already exists
-	traineeBytes, err := stub.GetState(role)
+	traineeBytes, err := stub.GetState(trainerID)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -305,9 +336,13 @@ func (t *SimpleChaincode) createTrainer(stub shim.ChaincodeStubInterface, args [
 
 	// Create a new trainer object
 	trainer := Trainer{
-		Name:       name,
-		Surname:    surname,
-		University: university,
+		TrainerID:     		trainerID,
+		FirstName:    		firstName,
+		LastName: 			lastName,
+		EmailAddress:   	emailAddress,
+		City: 				city,
+		Description:    	description,
+		Nickname: 			nickname,
 	}
 
 	// Convert trainee object to JSON
@@ -317,7 +352,7 @@ func (t *SimpleChaincode) createTrainer(stub shim.ChaincodeStubInterface, args [
 	}
 
 	// Save trainee JSON to the ledger
-	err = stub.PutState(role, trainerJSON)
+	err = stub.PutState(trainerID, trainerJSON)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -908,6 +943,104 @@ func (t *SimpleChaincode) deleteTraineeFromPlatform(stub shim.ChaincodeStubInter
 	return shim.Success(nil)
 }
 
+
+func (t *SimpleChaincode) createAdministrator(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 7 {
+		return shim.Error("Incorrect number of arguments. Expecting 4")
+	}
+	administratorID := args[0]
+	firstName := args[1]
+	lastName := args[2]
+	emailAddress := args[3]
+	city := args[4]
+	description := args[5]
+	nickname := args[6]
+	
+
+	// Check if Administrator already exists
+	adminBytes, err := stub.GetState(administratorID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if adminBytes != nil {
+		return shim.Error("AdministratorID already exists")
+	}
+
+	// Create a new Administrator object
+	administrator := Administrator{
+		AdministratorID:    administratorID,
+		FirstName:    		firstName,
+		LastName: 			lastName,
+		EmailAddress:    	emailAddress,
+		City: 				city,
+		Description:    	description,
+		Nickname: 			nickname,
+	}
+
+	// Convert Administrator object to JSON
+	administratorJSON, err := json.Marshal(administrator)
+	if err != nil {
+		return shim.Error("Failed to marshal Administrator to JSON")
+	}
+
+	// Save Administrator JSON to the ledger
+	err = stub.PutState(administratorID, administratorJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
+
+
+func (t *SimpleChaincode) createVlabOwner(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 7 {
+		return shim.Error("Incorrect number of arguments. Expecting 4")
+	}
+	vlabOwnerID := args[0]
+	firstName := args[1]
+	lastName := args[2]
+	emailAddress := args[3]
+	city := args[4]
+	description := args[5]
+	nickname := args[6]
+	
+
+	// Check if VlabOwner already exists
+	VlabOwnerBytes, err := stub.GetState(vlabOwnerID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if VlabOwnerBytes != nil {
+		return shim.Error("VlabOwnerID already exists")
+	}
+
+	// Create a new VlabOwner object
+	vlabOwner := VlabOwner{
+		VLabOwnerID:     	vlabOwnerID,
+		FirstName:    		firstName,
+		LastName: 			lastName,
+		EmailAddress:   	emailAddress,
+		City: 				city,
+		Description:    	description,
+		Nickname: 			nickname,
+	}
+
+	// Convert VlabOwner object to JSON
+	administratorJSON, err := json.Marshal(vlabOwner)
+	if err != nil {
+		return shim.Error("Failed to marshal VlabOwner to JSON")
+	}
+
+	// Save VlabOwner JSON to the ledger
+	err = stub.PutState(vlabOwnerID, administratorJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
 
 func main() {
 	err := shim.Start(new(SimpleChaincode))

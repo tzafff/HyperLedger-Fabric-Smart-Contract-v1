@@ -9,19 +9,19 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["ID1"]
+        "args": ["trainerID"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170185", "GOUSOU", "Christos", "UOP"]
+        "args": ["dit170186", "kyriakos", "Alev", "UOP"]
     },
     {
         "invoke": "createTrainer",
-        "args": ["Trainer", "Nikolaos", "Kolokotronis", "UOP"]
+        "args": ["trainerID", "Nikolaos", "Kolokotronis","email","city","desc","nickname"]
     },
     {
         "invoke": "createPlatform",
-        "args": ["ID1", "Linux","60","Spy  Analysis","DESCRIPTION1","BOXNAME1"]
+        "args": ["ID2", "Windows","40","Malware  Analysis","DESCRIPTION2","BOXNAME2"]
     },
     { 
         "invoke": "updateTraineeUniversity",
@@ -29,30 +29,38 @@
     },
     { 
         "invoke": "addTraineeToPlatform",
-        "args": ["dit170185", "ID1"]
+        "args": ["dit170186", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
-        "args": ["Trainer","dit170185","vlab4","93%"]
+        "args": ["Trainer","dit170185","vlab2","53%"]
     },
     {
         "invoke": "TransferTrainee",
-        "args": ["Trainer","dit170185","ID2","ID1"]
+        "args": ["Trainer","dit170185","ID1","ID2"]
     },
     {
         "invoke": "delete",
-        "args": ["vlab5"]
+        "args": ["admin1"]
     }, 
     {
         "invoke": "addVlabToTrainee",
-        "args": ["dit170185","vlab4"]
+        "args": ["dit170185","vlab1"]
     }, 
     {
         "invoke": "createVlab",
-        "args": ["vlab4","50"]
+        "args": ["vlab3","40"]
     }, 
     {
         "invoke": "deleteTraineeFromPlatform",
-        "args": ["dit170189","ID2"]
+        "args": ["dit170186","ID1"]
+    }, 
+    {
+        "invoke": "createAdministrator",
+        "args": ["admin1","firstname","lastname","email","city","desc","nickname"]
+    }, 
+    {
+        "invoke": "createVlabOwner",
+        "args": ["vlabowner","firstname","lastname","email","city","desc","nickname"]
     }
 ]
