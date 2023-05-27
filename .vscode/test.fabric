@@ -9,7 +9,7 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["ID1"]
+        "args": ["dit170185"]
     },
     {
         "invoke": "createTrainee",
@@ -25,7 +25,7 @@
     },
     { 
         "invoke": "addTraineeToPlatform",
-        "args": ["dit170185", "ID1"]
+        "args": ["admin1","dit170185", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
@@ -33,7 +33,7 @@
     },
     {
         "invoke": "TransferTrainee",
-        "args": ["Trainer","dit170184","ID1","ID2"]
+        "args": ["admin1","dit170184","ID1","ID2"]
     },
     {
         "invoke": "delete",
@@ -45,11 +45,11 @@
     }, 
     {
         "invoke": "createVlab",
-        "args": ["vlab2","Boxname","Domain","SystemType","Description","ExpPoints","BoxDifficulty","Timeneeded"]
+        "args": ["vlabowner1","vlab3","Boxname","Domain","SystemType","Description","ExpPoints","BoxDifficulty","Timeneeded"]
     }, 
     {
         "invoke": "deleteTraineeFromPlatform",
-        "args": ["dit170186","ID1"]
+        "args": ["admin1","dit170185","ID1"]
     }, 
     {
         "invoke": "createAdministrator",
@@ -57,6 +57,6 @@
     }, 
     {
         "invoke": "createVlabOwner",
-        "args": ["vlabowner","firstname","lastname","email","city","desc","nickname"]
+        "args": ["vlabowner1","firstname","lastname","email","city","desc","nickname"]
     }
 ]

@@ -24,6 +24,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	// "github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/hyperledger/fabric-chaincode-go/shim"
@@ -246,12 +247,19 @@ func (t *SimpleChaincode) createPlatform(stub shim.ChaincodeStubInterface, args 
 }
 
 func (t *SimpleChaincode) addTraineeToPlatform(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
 
-	role := args[0]
-	PlatformID := args[1]
+	administratorID := args[0]
+	role := args[1]
+	PlatformID := args[2]
+
+	// Check if administratorID starts with "admin"
+	if !strings.HasPrefix(administratorID, "admin") {
+		return shim.Error("Not authorized for that transaction.")
+	}
+
 
 	// Retrieve trainee from the ledger
 	traineeBytes, err := stub.GetState(role)
@@ -542,13 +550,13 @@ func (t *SimpleChaincode) TransferTrainee(stub shim.ChaincodeStubInterface, args
 		return shim.Error("Incorrect number of arguments. Expecting 4")
 	}
 
-	trainerID := args[0]
+	administratorID := args[0]
 	traineeID := args[1]
 	from_Platform := args[2]
 	to_Platform := args[3]
 
-	// Add authorized validation
-	if trainerID != "Trainer" {
+	// Check if administratorID starts with "admin"
+	if !strings.HasPrefix(administratorID, "admin") {
 		return shim.Error("Not authorized for that transaction.")
 	}
 
@@ -669,19 +677,25 @@ func (t *SimpleChaincode) TransferTrainee(stub shim.ChaincodeStubInterface, args
 
 func (t *SimpleChaincode) createVlab(stub shim.ChaincodeStubInterface, args []string) pb.Response {
 	// Check the number of arguments
-	if len(args) != 8 {
+	if len(args) != 9 {
 		return shim.Error("Incorrect number of arguments. Expecting vlabID")
+	}
+	vlabOwnerId := args[0]
+
+	// Check if administratorID starts with "admin"
+	if !strings.HasPrefix(vlabOwnerId, "vlabowner") {
+		return shim.Error("Not authorized for that transaction.")
 	}
 
 	// Extract the vlabID from the argument
-	vlabID := args[0]
-	boxName :=args[1]
-	domain := args[2]
-	systemType :=args[3]
-	description :=args[4]
-	expPoints :=args[5]
-	boxDifficulty :=args[6]
-	timeNeeded :=args[7]
+	vlabID := args[1]
+	boxName :=args[2]
+	domain := args[3]
+	systemType :=args[4]
+	description :=args[5]
+	expPoints :=args[6]
+	boxDifficulty :=args[7]
+	timeNeeded :=args[8]
 
 	// Check if the Vlab already exists in the ledger
 	vlabBytes, err := stub.GetState(vlabID)
@@ -833,12 +847,17 @@ func (t *SimpleChaincode) addVlabToTrainee(stub shim.ChaincodeStubInterface, arg
 }
 
 func (t *SimpleChaincode) deleteTraineeFromPlatform(stub shim.ChaincodeStubInterface, args []string) pb.Response {
-	if len(args) != 2 {
+	if len(args) != 3 {
 		return shim.Error("Incorrect number of arguments. Expecting 2")
 	}
+	administratorID := args[0]
+	traineeID := args[1]
+	platformID := args[2]
 
-	traineeID := args[0]
-	platformID := args[1]
+	// Check if administratorID starts with "admin"
+	if !strings.HasPrefix(administratorID, "admin") {
+		return shim.Error("Not authorized for that transaction.")
+	}
 
 	// Retrieve trainee from the ledger
 	traineeBytes, err := stub.GetState(traineeID)
