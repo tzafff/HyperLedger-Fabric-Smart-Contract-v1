@@ -9,11 +9,11 @@
     },
     { 
         "query": "getIdentity",
-        "args": ["ID2"]
+        "args": ["dit170185"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170185", "christos", "tzaferis", "email","city","desc","nickname"]
+        "args": ["dit170185", "kyriako", "alevizos", "email","city","desc","nickname"]
     },
     {
         "invoke": "createTrainer",
@@ -21,7 +21,7 @@
     },
     {
         "invoke": "createPlatform",
-        "args": ["ID2", "Try hack me","email","description"]
+        "args": ["ID1", "Hack The Box","email","description"]
     },
     { 
         "invoke": "addTraineeToPlatform",
@@ -29,7 +29,7 @@
     },
     {
         "invoke": "ScoreTheVlab",
-        "args": ["Trainer1","dit170185","vlab3","99%"]
+        "args": ["Trainer1","dit170185","vlab1","69"]
     },
     {
         "invoke": "TransferTrainee1",
@@ -41,7 +41,7 @@
     }, 
     {
         "invoke": "addVlabToTrainee",
-        "args": ["dit170185","vlab1"]
+        "args": ["dit170185","vlab2"]
     }, 
     {
         "invoke": "createVlab",
@@ -49,7 +49,7 @@
     }, 
     {
         "invoke": "deleteTraineeFromPlatform",
-        "args": ["admin1","dit170185","ID1"]
+        "args": ["admin1","dit170185","ID2"]
     }, 
     {
         "invoke": "createAdministrator",
@@ -62,5 +62,9 @@
     {
         "invoke": "addVlabToPlatform",
         "args": ["admin","vlab2","ID2"]
+    }, 
+    {
+        "invoke": "calculateExpPoints",
+        "args": ["dit170185"]
     }
 ]

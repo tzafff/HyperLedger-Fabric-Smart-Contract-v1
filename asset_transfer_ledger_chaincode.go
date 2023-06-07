@@ -24,6 +24,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	// "github.com/hyperledger/fabric/core/chaincode/shim"
@@ -67,6 +68,7 @@ type Trainee struct {
 	Description         string
 	Nickname 			string
 	ActivePlatform    	string
+	Total_Exp_Points	string
 	VlabPointsMap2 map[string]Vlab    `json:"Trainee_vlabs"`
 }
 
@@ -145,6 +147,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 		return t.createVlabOwner(stub, args)
 	} else if function == "addVlabToPlatform" {
 		return t.addVlabToPlatform(stub, args)
+	} else if function == "calculateExpPoints" {
+		return t.calculateExpPoints(stub, args)
 	}
 
 	
@@ -1150,6 +1154,99 @@ func contains(slice []string, str string) bool {
 	}
 	return false
 }
+
+
+
+func (t *SimpleChaincode) calculateExpPoints(stub shim.ChaincodeStubInterface, args []string) pb.Response {
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
+
+	traineeID := args[0]
+
+	// Retrieve trainee from the ledger
+	traineeBytes, err := stub.GetState(traineeID)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	if traineeBytes == nil {
+		return shim.Error("Trainee does not exist")
+	}
+
+	// Unmarshal trainee JSON
+	trainee := Trainee{}
+	err = json.Unmarshal(traineeBytes, &trainee)
+	if err != nil {
+		return shim.Error("Failed to unmarshal trainee JSON")
+	}
+
+	// Calculate the total experience points
+	expPoints := 0
+	for _, vlab := range trainee.VlabPointsMap2 {
+		if vlab.Result != "" {
+			// Convert the result to an integer and add it to expPoints
+			result, err := strconv.Atoi(vlab.Result)
+			if err != nil {
+				return shim.Error("Failed to convert vlab result to integer")
+			}
+			expPoints += result
+		}
+	}
+
+	// Update the trainee's experience points
+	trainee.Total_Exp_Points = strconv.Itoa(expPoints)
+
+	// Convert trainee object to JSON
+	updatedTraineeJSON, err := json.Marshal(trainee)
+	if err != nil {
+		return shim.Error("Failed to marshal updated trainee to JSON")
+	}
+
+
+
+	// Get the trainee's platform from the ledger
+	platformBytes, err := stub.GetState(trainee.ActivePlatform)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+
+	// Unmarshal the platform JSON
+	var platform Platform
+	err = json.Unmarshal(platformBytes, &platform)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	for i, trainee := range platform.Trainees {
+		if trainee.TraineeID == traineeID {
+			platform.Trainees[i].Total_Exp_Points = strconv.Itoa(expPoints)
+			break
+		}
+	}
+
+
+	// Convert the updated platform to JSON
+	updatedPlatformJSON, err := json.Marshal(platform)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Store the updated trainee in the ledger
+	err = stub.PutState(trainee.ActivePlatform, updatedPlatformJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// Save updated trainee JSON to the ledger
+	err = stub.PutState(traineeID, updatedTraineeJSON)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	return shim.Success(nil)
+}
+
 
 
 func main() {
