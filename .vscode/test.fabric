@@ -5,51 +5,51 @@
     },
     {
         "query": "getAllAsset",
-        "args": [""]
+        "args": ["vlab1"]
     },
     { 
         "query": "getIdentity",
-        "args": ["dit170185"]
+        "args": ["dit170186"]
     },
     {
         "invoke": "createTrainee",
-        "args": ["dit170185", "kyriako", "alevizos", "email","city","desc","nickname"]
+        "args": ["dit170186", "kyriakos", "alevizos", "dit1786@uop.gr","athens","desc","nickname"]
     },
     {
         "invoke": "createTrainer",
-        "args": ["Trainer1", "Nikolaos", "Kolokotronis","email","city","desc","nickname"]
+        "args": ["Trainer1", "Nikolaos", "Kolokotronis","nkolok@uop.gr","tripoli","Professor, Director of Cryptography and Security Lab","nick"]
     },
     {
         "invoke": "createPlatform",
-        "args": ["ID1", "Hack The Box","email","description"]
+        "args": ["ID2", "Try Hack Me","tryHackMe@gmail.com","Try Hack Me is an online..."]
     },
     { 
         "invoke": "addTraineeToPlatform",
-        "args": ["admin1","dit170185", "ID1"]
+        "args": ["admin1","dit170186", "ID1"]
     },
     {
         "invoke": "ScoreTheVlab",
-        "args": ["Trainer1","dit170185","vlab1","69"]
+        "args": ["Trainer1","dit170186","vlab3","79"]
     },
     {
         "invoke": "TransferTrainee1",
-        "args": ["admin1","dit170185","ID2"]
+        "args": ["admin1","dit170186","ID2"]
     },
     {
         "invoke": "delete",
-        "args": ["dit170185"]
+        "args": ["Trainer1"]
     }, 
     {
         "invoke": "addVlabToTrainee",
-        "args": ["dit170185","vlab2"]
+        "args": ["dit170186","vlab3"]
     }, 
     {
         "invoke": "createVlab",
-        "args": ["vlabowner1","vlab3","Boxname","Domain","SystemType","Description","ExpPoints","BoxDifficulty","Timeneeded"]
+        "args": ["vlabowner1","vlab3","Crypto Challenge","Cryptography","N/A","Solve the encryption puzzle to find the secret message.","90","Hard","4"]
     }, 
     {
         "invoke": "deleteTraineeFromPlatform",
-        "args": ["admin1","dit170185","ID2"]
+        "args": ["admin1","dit170186","ID1"]
     }, 
     {
         "invoke": "createAdministrator",
@@ -61,10 +61,10 @@
     }, 
     {
         "invoke": "addVlabToPlatform",
-        "args": ["admin","vlab2","ID2"]
+        "args": ["admin","vlab3","ID1"]
     }, 
     {
         "invoke": "calculateExpPoints",
-        "args": ["dit170185"]
+        "args": ["dit170186"]
     }
 ]
