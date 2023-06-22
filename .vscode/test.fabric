@@ -1,11 +1,11 @@
 [
     {
         "invoke": "getIdentity",
-        "args": ["vlab1"]
+        "args": ["vlab2"]
     },
     {
         "query": "getAllAsset",
-        "args": ["vlab1"]
+        "args": ["vlab2"]
     },
     { 
         "query": "getIdentity",
