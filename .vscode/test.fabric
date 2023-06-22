@@ -5,7 +5,7 @@
     },
     {
         "query": "getAllAsset",
-        "args": ["vlab2"]
+        "args": ["vlab"]
     },
     { 
         "query": "getIdentity",
